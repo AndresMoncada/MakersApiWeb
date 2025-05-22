@@ -1,10 +1,15 @@
-﻿namespace MakersApiWeb.Domain.Entities
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace MakersApiWeb.Domain.Entities
 {
     public class User
     {
-        public int Id { get; set; }
-        public string FullName { get; set; } = string.Empty;
-        public string Email { get; set; } = string.Empty;
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public int IdUser { get; set; }
+        public string? FullName { get; set; } = string.Empty;
+        public string? Email { get; set; } = string.Empty;
 
         public int RoleId { get; set; }
         public required Role Role { get; set; }

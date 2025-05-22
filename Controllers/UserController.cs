@@ -1,86 +1,62 @@
-﻿using MakersApiWeb.Common;
-using Microsoft.AspNetCore.Http;
+﻿using MakersApiWeb.App.DTOs;
+using MakersApiWeb.App.Handlers.UserHandler.Params;
+using MakersApiWeb.Common;
+using MakersApiWeb.Infraestructure.Context;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MakersApiWeb.Controllers
 {
     [Route("api/User")]
     [ApiController]
-    public class UserController : BaseController
+    public class UserController(AppDbContext context) : BaseController
     {
-        // GET: HomeController
-        public ActionResult Index()
+        private readonly AppDbContext _context = context;
+
+        // Get all users 
+        [Route("getAllUsers")]
+        [ResponseCache(Duration = 100)]
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<UserDto>>> GetAllUsers()
         {
-            return null;
+            var users = await Mediator.Send(new UserQueryAllCommand());
+            return Ok(users);
         }
 
-        // GET: HomeController/Details/5
-        public ActionResult Details(int id)
+        // Get user for id
+        [Route("getUserById/{id}")]
+        [ResponseCache(Duration = 100)]
+        [HttpGet]
+        public async Task<ActionResult<UserDto>?> GetUserById(int id)
         {
-            return null;
+            var user = await Mediator.Send(new UserQueryByIdCommand { Id = id });
+            return user;
         }
 
-        // GET: HomeController/Create
-        public ActionResult Create()
+        // Update user
+        [Route("updateUser/{id}")]
+        [HttpPut]
+        public async Task<IActionResult> UpdateUser(UserUpdateCommand request)
         {
-            return null;
+            await Mediator.Send(request);
+            return NoContent();
         }
 
-        // POST: HomeController/Create
+        // Create user
+        [Route("createUser")]
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Create(IFormCollection collection)
+        public async Task<ActionResult<bool>> CreateUser(UserInsCommand request)
         {
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return null;
-            }
+            var result = await Mediator.Send(request);
+            return CreatedAtAction(nameof(CreateUser), new { id = result.Id }, result);
         }
 
-        // GET: HomeController/Edit/5
-        public ActionResult Edit(int id)
+        // Delete user
+        [Route("deleteUser/{id}")]
+        [HttpDelete]
+        public async Task<ActionResult<bool>> DeleteUser(int id)
         {
-            return null;
-        }
-
-        // POST: HomeController/Edit/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
-        {
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return null;
-            }
-        }
-
-        // GET: HomeController/Delete/5
-        public ActionResult Delete(int id)
-        {
-            return null;
-        }
-
-        // POST: HomeController/Delete/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
-        {
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return null;
-            }
+            await Mediator.Send(new UserDelCommand { Id = id });
+            return NoContent();
         }
     }
 }

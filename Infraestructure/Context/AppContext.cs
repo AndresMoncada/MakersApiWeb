@@ -15,8 +15,8 @@ namespace MakersApiWeb.Infraestructure.Context
 
             // Seed roles
             modelBuilder.Entity<Role>().HasData(
-                new Role { Id = 1, Name = "Admin" },
-                new Role { Id = 2, Name = "User" }
+                new Role { IdRole = 1, Name = "Admin" },
+                new Role { IdRole = 2, Name = "User" }
             );
 
             // Relaciones

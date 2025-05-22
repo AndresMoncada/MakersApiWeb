@@ -1,5 +1,7 @@
-﻿using MakersApiWeb.Common;
-using Microsoft.AspNetCore.Http;
+﻿using MakersApiWeb.App.DTOs;
+using MakersApiWeb.App.Handlers.LoanHandler.Params;
+using MakersApiWeb.Common;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MakersApiWeb.Controllers
@@ -8,79 +10,61 @@ namespace MakersApiWeb.Controllers
     [ApiController]
     public class LoanController : BaseController
     {
-        // GET: HomeController
-        public ActionResult Index()
-        {
-            return null;
-        }
-
-        // GET: HomeController/Details/5
-        public ActionResult Details(int id)
-        {
-            return null;
-        }
-
-        // GET: HomeController/Create
-        public ActionResult Create()
-        {
-            return null;
-        }
-
-        // POST: HomeController/Create
+        // Create a loan
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Create(IFormCollection collection)
+        [ResponseCache(Duration = 100)]
+        [Authorize]
+        public async Task<ActionResult<LoanDto>> CreateLoan([FromBody] LoanInsCommand command)
         {
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return null;
-            }
+            var result = await Mediator.Send(command);
+            return CreatedAtAction(nameof(GetLoanById), new { id = result.Id }, result);
         }
 
-        // GET: HomeController/Edit/5
-        public ActionResult Edit(int id)
+        // Get all loans only admins    
+        /*[HttpGet]
+        [Authorize(Roles = "Admin")]
+        public async Task<ActionResult<IEnumerable<LoanDto>>> GetAllLoans()
         {
-            return null;
+            var result = await Mediator.Send(new GetAllLoansQuery());
+            return Ok(result);
+        }*/
+
+        // Get loan by id
+        [HttpGet("{id}")]
+        [ResponseCache(Duration = 100)]
+        [Authorize]
+        public async Task<ActionResult<LoanDto>> GetLoanById(int id)
+        {
+            var result = await Mediator.Send(new LoandQueryByIdCommand { IdLoan = id });
+            if (result == null) return NotFound();
+            return Ok(result);
         }
 
-        // POST: HomeController/Edit/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
+        // Approve a loan
+        /*[HttpPut("{id}/approve")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> ApproveLoan(int id)
         {
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return null;
-            }
-        }
+            await Mediator.Send(new ApproveLoanCommand(id));
+            return NoContent();
+        }*/
 
-        // GET: HomeController/Delete/5
-        public ActionResult Delete(int id)
+        // Reject a loan 
+        /*[HttpPut("{id}/reject")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> RejectLoan(int id)
         {
-            return null;
-        }
+            await Mediator.Send(new RejectLoanCommand(id));
+            return NoContent();
+        }*/
 
-        // POST: HomeController/Delete/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
+        // Get loans by user
+        /*[HttpGet("user/{userId}")]
+        [Authorize]
+        public async Task<ActionResult<IEnumerable<LoanDto>>> GetLoansByUser(int userId)
         {
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return null;
-            }
-        }
+            var result = await Mediator.Send(new GetLoansByUserIdQuery(userId));
+            return Ok(result);
+        }*/
     }
 }
